@@ -9,7 +9,7 @@ namespace GPM
 		//m_w is the real value of quaternion, this will be used to check if the quaternion is pure/identity or not.
 		double w;
 
-		static Quaternion identity;
+		// static const Quaternion identity;
 
 #pragma region Constructors & Assignment
 		inline Quaternion();

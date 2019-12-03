@@ -312,7 +312,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix3<T> Matrix3<T>::operator+(const Matrix3<U>& p_other) const
 {
-    return Add(this, p_other);
+    return Add(*this, p_other);
 }
 
 template<typename T>
@@ -347,7 +347,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix3<T> Matrix3<T>::operator-(const Matrix3<U>& p_other) const
 {
-    return Subtract(this, p_other);
+    return Subtract(*this, p_other);
 }
 
 template<typename T>

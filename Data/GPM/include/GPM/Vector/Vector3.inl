@@ -2,8 +2,6 @@
 #include <cmath>
 #include <iostream>
 
-#include "GPM/Tools/Utils.h"
-
 namespace GPM
 {
 #pragma region Constructor

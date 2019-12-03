@@ -8,78 +8,81 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "Animation/Bone.h"
+#include <GPM/GPM.h>
 
 class CSimulation : public ISimulation
 {
-	virtual void Init() override
-	{
-		int spine01 =	GetSkeletonBoneIndex("spine_01");
-		int spineParent = GetSkeletonBoneParentIndex(spine01);
-		const char* spineParentName = GetSkeletonBoneName(spineParent);
 
-		float posX, posY, posZ, quatW, quatX, quatY, quatZ;
-		size_t keyCount = GetAnimKeyCount("ThirdPersonWalk.anim");
-		GetAnimLocalBoneTransform("ThirdPersonWalk.anim", spineParent, keyCount / 2, posX, posY, posZ, quatW, quatX, quatY, quatZ);
-		
-		printf("Spine parent bone : %s\n", spineParentName);
-		printf("Anim key count : %ld\n", keyCount);
-		printf("Anim key : pos(%.2f,%.2f,%.2f) rotation quat(%.10f,%.10f,%.10f,%.10f)\n", posX, posY, posZ, quatW, quatX, quatY, quatZ);
-	}
+    std::vector<Animation::Bone> m_bones;
 
-	virtual void Update(float frameTime) override
-	{
-        struct Bone
+    virtual void Init() override
+    {
+        CreateSkeleton();
+    }
+
+
+    //float counter;
+    virtual void Update(float frameTime) override
+    {
+        //counter += frameTime;
+        DisplayBones();
+    }
+
+    void DisplayBones()
+    {
+        for (unsigned int i = 0; i < m_bones.size(); ++i)
         {
-            float x{}, y{}, z{};
-            float w{}, qx{}, qy{}, qz{};
-            float truex{ x + qx }, truey{ y + qy }, truez{ z + qz };
-            std::string name{};
-            int parentIndex{};
-        };
+            if (m_bones[i].GetParentIndex() > 0)
+            {
+                Matrix4F child = m_bones[i].GetWorldTransformMatrix();
+                Matrix4F parent = m_bones[m_bones[i].GetParentIndex()].GetWorldTransformMatrix();
+                const Vector3F childPos = { child.m_data[3],child.m_data[7],child.m_data[11] };
+                const Vector3F parentPos = { parent.m_data[3],parent.m_data[7],parent.m_data[11] };
+                DrawLine(parentPos.x, parentPos.y, parentPos.z, childPos.x, childPos.y, childPos.z, 1, 0, 1);
+                //std::cout << i << "drawing a line between " << m_bones[m_bones[i].GetParentIndex()].GetName() << " and " << m_bones[i].GetName() << '\n';
+            }
+            else
+            {
+                Matrix4F child = m_bones[i].GetWorldTransformMatrix();
+                const Vector3F childPos = { child.m_data[3],child.m_data[7],child.m_data[11] };
+                DrawLine(0, 0, 0, childPos.x, childPos.y, childPos.z, 1, 0, 1);
+            }
+        }
+    }
 
-        std::vector<Bone> m_bones;
-
+    void CreateSkeleton()
+    {
         for (unsigned int i = 0; i < GetSkeletonBoneCount(); ++i)
         {
-            Bone newBone;
-            GetAnimLocalBoneTransform("ThirdPersonWalk.anim", i, 0, newBone.x, newBone.y , newBone.z, newBone.w, newBone.qx, newBone.qy, newBone.qz);
-            newBone.name = GetSkeletonBoneName(i);
-            newBone.truex = newBone.x + newBone.qx;
-            newBone.truey = newBone.y + newBone.qy;
-            newBone.truez = newBone.z + newBone.qz;
+            Animation::Bone newBone;
+            Vector3F newPos{};
+            Vector4F newRot;
+
+            GetSkeletonBoneLocalBindTransform(i, newPos.x, newPos.y, newPos.z, newRot.w, newRot.x, newRot.y, newRot.z);
+
+
+            newBone.SetName(GetSkeletonBoneName(i));
+            if (newBone.GetName()._Starts_with("ik_"))
+                continue;
+
+            newBone.SetPosition(newPos);
+            const Quaternion quat(newRot.x, newRot.y, newRot.z, newRot.w);
+            newBone.SetRotation(quat);
+            newBone.SetParentIndex(GetSkeletonBoneParentIndex(i));
+            newBone.SetLocalTransformMatrix(Matrix4F::CreateTransformation(newBone.GetPosition(), newBone.GetRotation(), Vector3F::one));
+
+            if (newBone.GetParentIndex() >= 0)
+                newBone.SetWorldTransformMatrix(m_bones[newBone.GetParentIndex()].GetWorldTransformMatrix() * newBone.GetLocalTransformMatrix());
+            else
+                newBone.SetWorldTransformMatrix(newBone.GetLocalTransformMatrix());
+
             m_bones.push_back(newBone);
         }
-
-
-        //Bone b0;
-        //Bone b1;
-        //Bone b2;
-        //Bone b3;
-        //Bone b4;
-        //Bone b5;
-
-        //GetAnimLocalBoneTransform("ThirdPersonWalk.anim", 0, 0, b0.x, b0.y , b0.z, b0.w, b0.qx, b0.qy, b0.qz);
-        //GetAnimLocalBoneTransform("ThirdPersonWalk.anim", 1, 0, b1.x, b1.y , b1.z, b1.w, b1.qx, b1.qy, b1.qz);
-        //GetAnimLocalBoneTransform("ThirdPersonWalk.anim", 2, 0, b2.x, b2.y , b2.z, b2.w, b2.qx, b2.qy, b2.qz);
-        //GetAnimLocalBoneTransform("ThirdPersonWalk.anim", 3, 0, b3.x, b3.y , b3.z, b3.w, b3.qx, b3.qy, b3.qz);
-        //GetAnimLocalBoneTransform("ThirdPersonWalk.anim", 4, 0, b4.x, b4.y , b4.z, b4.w, b4.qx, b4.qy, b4.qz);
-        //GetAnimLocalBoneTransform("ThirdPersonWalk.anim", 5, 0, b5.x, b5.y , b5.z, b5.w, b5.qx, b5.qy, b5.qz);
-        //b0.name = GetSkeletonBoneName(0);
-
-        for (unsigned int i = 1; i < m_bones.size() - 2; ++i)
-            DrawLine(m_bones[i].truex + m_bones[i - 1].truex, m_bones[i].truey + m_bones[i-1].truey, m_bones[i].truez + m_bones[i-1].truez, m_bones[i+1].truex + m_bones[i].truex, m_bones[i+1].truey + m_bones[i].truey, m_bones[i+1].truez + m_bones[i].truez, 1, 0, 1);
-
-		//// X axis
-		//DrawLine(0, 0, 0, 100, 0, 0, 1, 0, 0);
-
-		//// Y axis
-		//DrawLine(0, 0, 0, 0, 100, 0, 0, 1, 0);
-
-		//// Z axis
-		//DrawLine(0, 0, 0, 0, 0, 100, 0, 0, 1);
-
-	}
+    }
 };
+
+
 
 int main()
 {

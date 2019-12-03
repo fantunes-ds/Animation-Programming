@@ -574,7 +574,7 @@ namespace GPM
 	}
 
 	template <typename T>
-	constexpr Vector4<T>& Vector4<T>::Scale(const T p_scale) const
+	constexpr Vector4<T>& Vector4<T>::Scale(const T p_scale)
 	{
 		x *= p_scale;
 		y *= p_scale;

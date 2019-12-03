@@ -2,14 +2,16 @@
 #define __SIMULATION_H__
 
 #include "Engine.h"
+#include "Animation/Bone.h"
 
 class ENGINE_API ISimulation
 {
 public:
-	virtual ~ISimulation() {}
+    virtual ~ISimulation() {}
 
-	virtual void Init() {}
-	virtual void Update( float frameTime ){}
+    virtual void Init() {}
+    virtual void Update(float frameTime) {}
+
 };
 
 

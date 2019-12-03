@@ -25,6 +25,7 @@ uniform lowp vec3 		lightDirection;
 void main(void)
 {
 
+	texturColor = vec4(1,1,1,0);
 
 	lowp vec3 lightDir = -lightDirection;
 	lowp float intensity = clamp(dot(normalize(outNormal), lightDir), 0.0f, 1.0f);

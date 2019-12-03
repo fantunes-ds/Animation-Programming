@@ -3,8 +3,6 @@
 
 namespace GPM
 {
-    struct Quaternion;
-
 	template<typename T>
 	struct Vector3
 	{
@@ -98,7 +96,8 @@ namespace GPM
          * @brief Normalized 
          * @return the copy of Normalized vector
          */
-        [[nodiscard]] constexpr Vector3<T> Normalized() const;
+        constexpr Vector3<T> Normalized() const;
+
         /**
          * @brief ToString
          * @return string format of the vector
@@ -125,7 +124,7 @@ namespace GPM
          * @brief Calculate the Magnitude of the current vector
          * @return The Magnitude
          */
-        [[nodiscard]] constexpr T Magnitude() const;
+		constexpr T Magnitude() const;
 
         /**
          * @brief forward unit vector

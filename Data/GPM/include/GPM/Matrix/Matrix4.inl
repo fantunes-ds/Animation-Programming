@@ -146,9 +146,9 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T>& Matrix4<T>::Scale(const Vector3<U>& p_scale)
 {
-    this *= CreateScale(p_scale);
+    (*this) = CreateScale(p_scale);
 
-    return { *this };
+    return { (*this) };
 }
 
 template<typename T>
@@ -166,7 +166,7 @@ constexpr Matrix4<T> Matrix4<T>::CreateScale(const Vector3<U>& p_scale)
 template<typename T>
 constexpr Matrix4<T>& Matrix4<T>::Rotate(const Quaternion& p_rotation)
 {
-    this *= p_rotation.ToMatrix4();
+    (*this) *= p_rotation.ToMatrix4();
 
     return { *this };
 }
@@ -181,7 +181,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T>& Matrix4<T>::Translate(const Vector3<U>& p_translate)
 {
-    this *= CreateTranslate(p_translate);
+    (*this) *= CreateTranslation(p_translate);
 
     return { *this };
 }
@@ -203,7 +203,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T>& Matrix4<T>::Transform(const Vector3<U>& p_translate, const Quaternion& p_rotation, const Vector3<U>& p_scale)
 {
-    this *= CreateTransform(p_translate, p_rotation, p_scale);
+    (*this) *= CreateTransformation(p_translate, p_rotation, p_scale);
 
     return { *this };
 }
@@ -313,7 +313,7 @@ T Matrix4<T>::GetMinor(Matrix3<T> p_minor)
 #pragma region Conversions
 
 template<typename T>
-constexpr std::string Matrix4<T>::ToString() noexcept
+constexpr std::string Matrix4<T>::ToString() const noexcept
 {
     std::stringstream StringStream;
     StringStream << '[' << m_data[0] << "  " << m_data[1] << "  " << m_data[2] << "  " << m_data[3] << "]\n"
@@ -363,7 +363,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T> Matrix4<T>::operator+(const Matrix4<U>& p_other) const
 {
-    return Add(this, p_other);
+    return Add(*this, p_other);
 }
 
 template<typename T>
@@ -400,7 +400,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T> Matrix4<T>::operator-(const Matrix4<U>& p_other) const
 {
-    return Subtract(this, p_other);
+    return Subtract(*this, p_other);
 }
 
 template<typename T>
@@ -583,10 +583,30 @@ bool Matrix4<T>::operator!=(const Matrix4<T>& p_matrix)
 }
 
 template<typename T>
-template<typename U>
-void Matrix4<T>::operator=(const Matrix4<U>& p_matrix)
+Matrix4<T>& Matrix4<T>::operator=(const Matrix4<T>& p_matrix)
 {
-    Set(*this, p_matrix);
+	Set(*this, p_matrix);
+
+	return { (*this) };
+}
+
+template<typename T>
+template<typename U>
+Matrix4<T>& Matrix4<T>::operator=(const Matrix4<U>& p_matrix)
+{
+	Set(*this, p_matrix);
+
+	return { (*this) };
+}
+
+template <typename T>
+constexpr std::ostream& GPM::operator<<(std::ostream& p_os, const Matrix4<T>& p_vector)
+{
+	p_os << '[' << p_vector.m_data[0] << "  " << p_vector.m_data[1] << "  " << p_vector.m_data[2] << "  " << p_vector.m_data[3] << "]\n"
+		<< '[' << p_vector.m_data[4] << "  " << p_vector.m_data[5] << "  " << p_vector.m_data[6] << "  " << p_vector.m_data[7] << "]\n"
+		<< '[' << p_vector.m_data[8] << "  " << p_vector.m_data[9] << "  " << p_vector.m_data[10] << "  " << p_vector.m_data[11] << "]\n"
+		<< '[' << p_vector.m_data[12] << "  " << p_vector.m_data[13] << "  " << p_vector.m_data[14] << "  " << p_vector.m_data[15] << "]\n";
+	return p_os;
 }
 
 template<typename T>
