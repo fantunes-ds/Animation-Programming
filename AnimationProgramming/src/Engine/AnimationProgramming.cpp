@@ -38,8 +38,8 @@ class CSimulation : public ISimulation
         {
             if (m_bones[i].GetParentIndex() > 0)
             {
-                Matrix4F child = m_bones[i].GetAnimTransformMatrix();
-                Matrix4F parent = m_bones[m_bones[i].GetParentIndex()].GetAnimTransformMatrix();
+                Matrix4F child = m_bones[i].GetCurrentTransformMatrix();
+                Matrix4F parent = m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix();
                 const Vector3F childPos = { child.m_data[3],child.m_data[7],child.m_data[11] };
                 const Vector3F parentPos = { parent.m_data[3],parent.m_data[7],parent.m_data[11] };
                 DrawLine(parentPos.x, parentPos.y, parentPos.z, childPos.x, childPos.y, childPos.z, 1, 0, 1);
@@ -54,33 +54,29 @@ class CSimulation : public ISimulation
         }
     }
 
-    void UpdateSkeleton(const unsigned int p_boneIndex)
-    {
-            if (!m_bones[p_boneIndex].GetChildIndexes().empty())
-                for (unsigned int b = 0; b < m_bones[p_boneIndex].GetChildIndexes().size(); ++b)
-                    m_bones[m_bones[p_boneIndex].GetChildIndexes()[b]].SetAnimTransformMatrix(m_bones[m_bones[p_boneIndex].GetChildIndexes()[b]].GetLocalTPose() * m_bones[p_boneIndex].GetWorldTPose());
-    }
-
     void PlayAnimation(const size_t frame)
     {
+        float m_matricesArray[976];
         Vector3F newPos{};
         Vector4F newRot;
-
         for (unsigned int i = 0; i < m_bones.size(); ++i)
         {
-            GetAnimLocalBoneTransform("ThirdPersonWalk.anim", i, frame % GetAnimKeyCount("ThirdPersonWalk.anim"), newPos.x, newPos.y, newPos.z, newRot.w, newRot.x, newRot.y, newRot.z);
+            GetAnimLocalBoneTransform("ThirdPersonRun.anim", i, frame % GetAnimKeyCount("ThirdPersonRun.anim"), newPos.x, newPos.y, newPos.z, newRot.w, newRot.x, newRot.y, newRot.z);
             Quaternion newRotQuat(newRot.x, newRot.y, newRot.z, newRot.w);
              
             Matrix4F newMat = Matrix4F::CreateTransformation(newPos, newRotQuat, Vector3F::one);
-            if(m_bones[i].GetParentIndex() > 0)
-               m_bones[i].SetAnimTransformMatrix(m_bones[m_bones[i].GetParentIndex()].GetAnimTransformMatrix() * m_bones[i].GetLocalTPose()  * newMat);
+            if (m_bones[i].GetParentIndex() > 0)
+                m_bones[i].SetCurrentTransformMatrix(m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix() * m_bones[i].GetLocalTPose() * newMat);
             else
-               m_bones[i].SetAnimTransformMatrix(m_bones[i].GetLocalTPose()  * newMat);
-
-            //UpdateSkeleton(i);
+                m_bones[i].SetCurrentTransformMatrix(m_bones[i].GetLocalTPose() * newMat);
+            
+            for (int j = 0; j < 16; ++j)
+                m_matricesArray[(i * 16) + j] = (m_bones[i].GetCurrentTransformMatrix() * Matrix4F::Inverse(m_bones[i].GetWorldTPose())).m_data[j];
         }
+            SetSkinningPose(m_matricesArray, m_bones.size());
     }
 
+    // We have no reason to create a class for this because there is only one squeleton
     void CreateSkeleton()
     {
         for (unsigned int i = 0; i < GetSkeletonBoneCount(); ++i)
@@ -110,7 +106,7 @@ class CSimulation : public ISimulation
             else
                 newBone.SetWorldTransformMatrix(newBone.GetLocalTPose());
 
-            newBone.SetAnimTransformMatrix(newBone.GetWorldTPose());
+            newBone.SetCurrentTransformMatrix(newBone.GetWorldTPose());
             m_bones.push_back(newBone);
         }
     }

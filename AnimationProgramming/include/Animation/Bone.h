@@ -18,7 +18,7 @@ namespace Animation
         const std::string& GetName() const { return m_name; }
         const Matrix4F& GetLocalTPose() const { return m_localTPose; }
         const Matrix4F& GetWorldTPose() const { return m_worldTPose; }
-        const Matrix4F& GetAnimTransformMatrix() const { return m_animTransformMatrix; }
+        const Matrix4F& GetCurrentTransformMatrix() const { return m_currentTransformMatrix; }
         const std::vector<unsigned int>& GetChildIndexes() const { return m_childIndexes; }
         unsigned int GetChildIndex(unsigned int p_index) const { return m_childIndexes[p_index]; }
 
@@ -29,7 +29,7 @@ namespace Animation
         void SetName(const std::string& p_newName) { m_name = p_newName; }
         void SetLocalTransformMatrix(const Matrix4F& p_newMatrix) { m_localTPose = p_newMatrix; };
         void SetWorldTransformMatrix(const Matrix4F& p_newMatrix) { m_worldTPose = p_newMatrix; };
-        void SetAnimTransformMatrix(const Matrix4F& p_newMatrix) { m_animTransformMatrix = p_newMatrix; };
+        void SetCurrentTransformMatrix(const Matrix4F& p_newMatrix) { m_currentTransformMatrix = p_newMatrix; };
 
     private:
         Vector3F m_position{};
@@ -39,7 +39,7 @@ namespace Animation
         std::vector<unsigned int> m_childIndexes;
         Matrix4F m_localTPose{};
         Matrix4F m_worldTPose{};
-        Matrix4F m_animTransformMatrix{};
+        Matrix4F m_currentTransformMatrix{};
 
     };
 }
