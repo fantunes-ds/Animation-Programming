@@ -22,12 +22,12 @@ class CSimulation : public ISimulation
     }
 
 
-    float counter;
-    float animSpeed = 16;
+    float TimeElapsedSinceStart;
+    float animSpeed = 10;
     virtual void Update(float frameTime) override
     {
-        counter += frameTime * animSpeed;
-        PlayAnimation(static_cast<size_t>(counter));
+        TimeElapsedSinceStart += frameTime * animSpeed;
+        PlayAnimation(TimeElapsedSinceStart, "ThirdPersonRun.anim");
 
         DisplayBones();
     }
@@ -54,26 +54,41 @@ class CSimulation : public ISimulation
         }
     }
 
-    void PlayAnimation(const size_t frame)
+    void PlayAnimation(float p_animationFrameTarget, std::string p_animName)
     {
         float m_matricesArray[976];
-        Vector3F newPos{};
-        Vector4F newRot;
+
+        Vector3F newCurrentPos{};
+        Vector4F newCurrentRot{};
+
+        Vector3F newNextPos{};
+        Vector4F newNextRot{};
+
         for (unsigned int i = 0; i < m_bones.size(); ++i)
         {
-            GetAnimLocalBoneTransform("ThirdPersonRun.anim", i, frame % GetAnimKeyCount("ThirdPersonRun.anim"), newPos.x, newPos.y, newPos.z, newRot.w, newRot.x, newRot.y, newRot.z);
-            Quaternion newRotQuat(newRot.x, newRot.y, newRot.z, newRot.w);
+            GetAnimLocalBoneTransform(p_animName.c_str(), i, static_cast<size_t>(p_animationFrameTarget) % GetAnimKeyCount(p_animName.c_str()), newCurrentPos.x, newCurrentPos.y, newCurrentPos.z, newCurrentRot.w, newCurrentRot.x, newCurrentRot.y, newCurrentRot.z);
+            GetAnimLocalBoneTransform(p_animName.c_str(), i, static_cast<size_t>(p_animationFrameTarget + 1) % GetAnimKeyCount(p_animName.c_str()), newNextPos.x, newNextPos.y, newNextPos.z, newNextRot.w, newNextRot.x, newNextRot.y, newNextRot.z);
+
+            const float interTime = Tools::Utils::GetDecimalPart(TimeElapsedSinceStart);
+
+            Vector3F interpolatedPos = Vector3F::Lerp(newCurrentPos, newNextPos, interTime);
+
+            Quaternion newCurrentQuat(newCurrentRot.x, newCurrentRot.y, newCurrentRot.z, newCurrentRot.w);
+            Quaternion newNextQuat(newNextRot.x, newNextRot.y, newNextRot.z, newNextRot.w);
+
+            Quaternion interpolatedQuat{ Quaternion::Nlerp(newCurrentQuat, newNextQuat, interTime) };
              
-            Matrix4F newMat = Matrix4F::CreateTransformation(newPos, newRotQuat, Vector3F::one);
+            Matrix4F newMat4 = Matrix4F::CreateTransformation(interpolatedPos, interpolatedQuat , Vector3F::one);
             if (m_bones[i].GetParentIndex() > 0)
-                m_bones[i].SetCurrentTransformMatrix(m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix() * m_bones[i].GetLocalTPose() * newMat);
+                m_bones[i].SetCurrentTransformMatrix(m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix() * m_bones[i].GetLocalTPose() * newMat4);
             else
-                m_bones[i].SetCurrentTransformMatrix(m_bones[i].GetLocalTPose() * newMat);
+                m_bones[i].SetCurrentTransformMatrix(m_bones[i].GetLocalTPose() * newMat4);
             
             for (int j = 0; j < 16; ++j)
                 m_matricesArray[(i * 16) + j] = (m_bones[i].GetCurrentTransformMatrix() * Matrix4F::Inverse(m_bones[i].GetWorldTPose())).m_data[j];
         }
-            SetSkinningPose(m_matricesArray, m_bones.size());
+
+        SetSkinningPose(m_matricesArray, m_bones.size());
     }
 
     // We have no reason to create a class for this because there is only one squeleton
