@@ -122,50 +122,6 @@ void Animation::PlayAnimation(const float p_animationFrameTarget, const std::str
     }
 
     SetSkinningPose(m_matricesArray, m_bones.size());
-
-
-
-
-
-   /* float m_matricesArray[976];
-
-    Vector3F newCurrentPos{};
-    Vector4F newCurrentRot{};
-
-    Vector3F newNextPos{};
-    Vector4F newNextRot{};
-
-    const size_t nbOfFrames = GetAnimKeyCount(p_animName.c_str());
-
-    for (unsigned int i = 0; i < m_bones.size(); ++i)
-    {
-        const size_t currentFrame = static_cast<size_t>(p_animationFrameTarget) % (nbOfFrames - 1);
-        const size_t nextFrame = static_cast<size_t>(p_animationFrameTarget + 1) % (nbOfFrames - 1);
-        GetAnimLocalBoneTransform(p_animName.c_str(), i, currentFrame, newCurrentPos.x, newCurrentPos.y, newCurrentPos.z, newCurrentRot.w, newCurrentRot.x, newCurrentRot.y, newCurrentRot.z);
-        GetAnimLocalBoneTransform(p_animName.c_str(), i, nextFrame, newNextPos.x, newNextPos.y, newNextPos.z, newNextRot.w, newNextRot.x, newNextRot.y, newNextRot.z);
-
-        DrawProgressBar(p_animationFrameTarget, nbOfFrames);
-
-        float interTime = Tools::Utils::GetDecimalPart(TimeElapsedSinceAnimStart);
-
-        Vector3F interpolatedPos = Vector3F::Lerp(newCurrentPos, newNextPos, interTime);
-
-        Quaternion newCurrentQuat(newCurrentRot.x, newCurrentRot.y, newCurrentRot.z, newCurrentRot.w);
-        Quaternion newNextQuat(newNextRot.x, newNextRot.y, newNextRot.z, newNextRot.w);
-
-        Quaternion interpolatedQuat{ Quaternion::SlerpShortestPath(newCurrentQuat, newNextQuat, interTime) };
-
-        Matrix4F newMat4 = Matrix4F::CreateTransformation(interpolatedPos, interpolatedQuat, Vector3F::one);
-        if (m_bones[i].GetParentIndex() > 0)
-            m_bones[i].SetCurrentTransformMatrix(m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix() * m_bones[i].GetLocalTPose() * newMat4);
-        else
-            m_bones[i].SetCurrentTransformMatrix(m_bones[i].GetLocalTPose() * newMat4);
-
-        for (int j = 0; j < 16; ++j)
-            m_matricesArray[(i * 16) + j] = (m_bones[i].GetCurrentTransformMatrix() * Matrix4F::Inverse(m_bones[i].GetWorldTPose())).m_data[j];
-    }
-
-    SetSkinningPose(m_matricesArray, m_bones.size());*/
 }
 
 void Animation::DrawProgressBar(const float p_animationFrameTarget, const int nbOfFrames)
