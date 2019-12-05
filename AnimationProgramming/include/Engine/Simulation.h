@@ -2,8 +2,6 @@
 #define __SIMULATION_H__
 
 #include "Engine.h"
-#include "Animation/Bone.h"
-
 class ENGINE_API ISimulation
 {
 public:

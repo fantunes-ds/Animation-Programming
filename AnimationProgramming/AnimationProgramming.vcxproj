@@ -160,14 +160,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Animation\Bone.h" />
+    <ClInclude Include="include\Anim\Animation.h" />
+    <ClInclude Include="include\Anim\Bone.h" />
     <ClInclude Include="include\Engine\Engine.h" />
     <ClInclude Include="include\Engine\Simulation.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\Engine\targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Animation\Bone.cpp" />
+    <ClCompile Include="src\Anim\Animation.cpp" />
+    <ClCompile Include="src\Anim\Bone.cpp" />
     <ClCompile Include="src\Engine\AnimationProgramming.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
   </ItemGroup>

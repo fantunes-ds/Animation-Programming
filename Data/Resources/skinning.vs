@@ -35,11 +35,8 @@ void main(void)
 	vec4 pos = vec4(0,0,0,1);
 	for (int i = 0; i < 4; ++i)
 	{
-		pos += boneWeights[i] * ( vec4(inputPosition, 1.0f) * skin.mat[int(boneIndices[i])]);
+		pos += boneWeights[i] * (vec4(inputPosition, 1.0f) * skin.mat[int(boneIndices[i])]);
 	}
-
-	// vec4 pos = boneWeights[0] * (skin.mat[int(boneIndices[0])] * vec4(inputPosition, 1.0f));
-
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
 	gl_Position = sm.projectionMatrix * (modelViewMatrix * vec4(pos.xyz, 1.0f));
