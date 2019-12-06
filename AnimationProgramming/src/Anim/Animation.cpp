@@ -1,6 +1,5 @@
 #include <Anim/Animation.h>
-#include <windows.h>
-
+#include <windows.h>    
 
 void Animation::Init()
 {
@@ -10,13 +9,48 @@ void Animation::Init()
 }
 
 void Animation::Update(float frameTime)
-{
-    TimeElapsedSinceAnimStart += frameTime * animSpeed;
+{    
+    UpdateTime(frameTime);
     CheckForInput();
-
     PlayAnimation(TimeElapsedSinceAnimStart, m_currentAnimation);
+}
 
-    DisplayBones();
+void Animation::UpdateTime(const float frameTime)
+{
+    if (m_animations.find(m_currentAnimation) != m_animations.end())
+        m_currentAnimationFrameCount = m_animations.find(m_currentAnimation)->second.size() / m_bones.size();
+
+    if (m_currentAnimationFrameCount == 0)
+    {
+        std::cout << "No animation was loaded." << '\n';
+        DisplaySkeleton();
+        return;
+    }
+    if (TimeElapsedSinceAnimStart > 0)
+        TimeElapsedSinceAnimStart += frameTime * animSpeed;
+    else
+        TimeElapsedSinceAnimStart = m_currentAnimationFrameCount;
+}
+
+void Animation::CheckForInput()
+{
+    if (GetKeyState('Y') & 0x8000)
+    {
+        animSpeed -= 0.05f;
+    }
+    if (GetKeyState('U') & 0x8000)
+    {
+        animSpeed += 0.05f;
+    }
+
+    if (GetKeyState('O') & 0x8000)
+    {
+        m_animToPlay = "ThirdPersonWalk.anim";
+    }
+    if (GetKeyState('I') & 0x8000)
+    {
+        m_animToPlay = "ThirdPersonRun.anim";
+    }
 }
 
 // We have no reason to create a class for this because there is only one squeleton
@@ -49,27 +83,24 @@ void Animation::CreateSkeleton()
     }
 }
 
-void Animation::CheckForInput()
+void Animation::DisplaySkeleton()
 {
-    if (GetKeyState('Y') & 0x8000)
+    for (unsigned int i = 2; i < m_bones.size(); ++i)
     {
-        if (animSpeed > 0)
-            animSpeed -= 0.05f;
+        if (m_bones[i].GetParentIndex() > 0)
+        {
+            Matrix4F       child = m_bones[i].GetCurrentTransformMatrix();
+            Matrix4F       parent = m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix();
+            const Vector3F childPos = { child.m_data[3], child.m_data[7], child.m_data[11] };
+            const Vector3F parentPos = { parent.m_data[3], parent.m_data[7], parent.m_data[11] };
+            DrawLine(parentPos.x, parentPos.y, parentPos.z, childPos.x, childPos.y, childPos.z, 1, 0, 1);
+        }
         else
-            animSpeed = 0;
-    }
-    if (GetKeyState('U') & 0x8000)
-    {
-        animSpeed += 0.05f;
-    }
-
-    if (GetKeyState('O') & 0x8000)
-    {
-        m_animToPlay = "ThirdPersonWalk.anim";
-    }
-    if (GetKeyState('I') & 0x8000)
-    {
-        m_animToPlay = "ThirdPersonRun.anim";
+        {
+            Matrix4F       child = m_bones[i].GetWorldTPose();
+            const Vector3F childPos = { child.m_data[3], child.m_data[7], child.m_data[11] };
+            DrawLine(0, 0, 0, childPos.x, childPos.y, childPos.z, 1, 0, 1);
+        }
     }
 }
 
@@ -81,6 +112,9 @@ void Animation::LoadAnimation(const std::string& p_animName)
     std::vector<std::pair<Vector3F, Quaternion>> m_animData;
 
     const size_t nbOfFrames = GetAnimKeyCount(p_animName.c_str());
+
+    if (m_bones.empty())
+        std::cout << '\r' << "No Skeleton was found. Have you created one using Animation::CreateSkeleton() ?";
 
     for (unsigned int frame = 0; frame < nbOfFrames; ++frame)
     {
@@ -103,7 +137,15 @@ void Animation::PlayAnimation(const float p_animationFrameTarget, const std::str
     std::vector<std::pair<Vector3F, Quaternion>> nextAnimData;
 
     if (m_currentAnimation != m_animToPlay)
-        nextAnimData = m_animations.find(m_animToPlay)->second;
+    {
+        if (m_animations.find(m_animToPlay) != m_animations.end())
+            nextAnimData = m_animations.find(m_animToPlay)->second;
+        else if (m_animations.find(m_animToPlay) == m_animations.end())
+        {
+            std::cout << "You didn't Load the next animation. Please load the animation you want to transition to." << '\n';
+            return;
+        }
+    }
     else
         nextAnimData = animData;
 
@@ -136,27 +178,6 @@ void Animation::PlayAnimation(const float p_animationFrameTarget, const std::str
     m_currentAnimation = m_animToPlay;
 
     SetSkinningPose(m_matricesArray, m_bones.size());
-}
-
-void Animation::DisplayBones()
-{
-    for (unsigned int i = 2; i < m_bones.size(); ++i)
-    {
-        if (m_bones[i].GetParentIndex() > 0)
-        {
-            Matrix4F       child     = m_bones[i].GetCurrentTransformMatrix();
-            Matrix4F       parent    = m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix();
-            const Vector3F childPos  = {child.m_data[3], child.m_data[7], child.m_data[11]};
-            const Vector3F parentPos = {parent.m_data[3], parent.m_data[7], parent.m_data[11]};
-            DrawLine(parentPos.x, parentPos.y, parentPos.z, childPos.x, childPos.y, childPos.z, 1, 0, 1);
-        }
-        else
-        {
-            Matrix4F       child    = m_bones[i].GetWorldTPose();
-            const Vector3F childPos = {child.m_data[3], child.m_data[7], child.m_data[11]};
-            DrawLine(0, 0, 0, childPos.x, childPos.y, childPos.z, 1, 0, 1);
-        }
-    }
 }
 
 void Animation::DrawProgressBar(const float p_animationFrameTarget, const int nbOfFrames)
