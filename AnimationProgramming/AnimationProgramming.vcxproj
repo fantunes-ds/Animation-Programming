@@ -140,6 +140,12 @@
       <AdditionalLibraryDirectories>../Data;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Engine.lib;GPM.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>XCOPY $(SolutionDir)Data $(OutDir) /y
+mkdir $(Outdir)Resources
+XCOPY $(SolutionDir)Data\Resources $(OutDir)Resources
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>

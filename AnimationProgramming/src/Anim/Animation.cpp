@@ -127,7 +127,7 @@ void Animation::LoadAnimation(const std::string& p_animName)
         {
             GetAnimLocalBoneTransform(p_animName.c_str(), i, frame, newPos.x, newPos.y, newPos.z,
                                       newRot.w, newRot.x, newRot.y, newRot.z);
-
+    
             const Quaternion newCurrentQuat(newRot.x, newRot.y, newRot.z, newRot.w);
             m_animData.emplace_back(newPos, newCurrentQuat);
         }
