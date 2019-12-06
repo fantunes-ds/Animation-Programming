@@ -9,10 +9,13 @@ void Animation::Init()
 }
 
 void Animation::Update(float frameTime)
-{    
+{
     UpdateTime(frameTime);
+
     CheckForInput();
+
     PlayAnimation(TimeElapsedSinceAnimStart, m_currentAnimation);
+    DisplaySkeleton();
 }
 
 void Animation::UpdateTime(const float frameTime)
@@ -57,12 +60,14 @@ void Animation::CheckForInput()
 void Animation::CreateSkeleton()
 {
     m_skeletonBoneCount = GetSkeletonBoneCount();
+
+    Vector3F    newPos{};
+    Vector4F    newRot{};
+    std::string name{};
+
     for (unsigned int i = 0; i < m_skeletonBoneCount; ++i)
     {
-        Vector3F newPos{};
-        Vector4F newRot{};
-
-        std::string name = GetSkeletonBoneName(i);
+        name = GetSkeletonBoneName(i);
         if (name._Starts_with("ik_"))
             continue;
 
@@ -89,16 +94,16 @@ void Animation::DisplaySkeleton()
     {
         if (m_bones[i].GetParentIndex() > 0)
         {
-            const Matrix4F child = m_bones[i].GetCurrentTransformMatrix();
-            const Matrix4F parent = m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix();
-            const Vector3F childPos = { child.m_data[3], child.m_data[7], child.m_data[11] };
-            const Vector3F parentPos = { parent.m_data[3], parent.m_data[7], parent.m_data[11] };
+            const Matrix4F& child     = m_bones[i].GetCurrentTransformMatrix();
+            const Matrix4F& parent    = m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix();
+            const Vector3F& childPos  = {child.m_data[3], child.m_data[7], child.m_data[11]};
+            const Vector3F& parentPos = {parent.m_data[3], parent.m_data[7], parent.m_data[11]};
             DrawLine(parentPos.x, parentPos.y, parentPos.z, childPos.x, childPos.y, childPos.z, 1, 0, 1);
         }
         else
         {
-            const Matrix4F       child = m_bones[i].GetWorldTPose();
-            const Vector3F childPos = { child.m_data[3], child.m_data[7], child.m_data[11] };
+            const Matrix4F& child    = m_bones[i].GetWorldTPose();
+            const Vector3F& childPos = {child.m_data[3], child.m_data[7], child.m_data[11]};
             DrawLine(0, 0, 0, childPos.x, childPos.y, childPos.z, 1, 0, 1);
         }
     }
@@ -106,8 +111,8 @@ void Animation::DisplaySkeleton()
 
 void Animation::LoadAnimation(const std::string& p_animName)
 {
-    Vector3F newCurrentPos{};
-    Vector4F newCurrentRot{};
+    Vector3F newPos{};
+    Vector4F newRot{};
 
     std::vector<std::pair<Vector3F, Quaternion>> m_animData;
 
@@ -120,11 +125,11 @@ void Animation::LoadAnimation(const std::string& p_animName)
     {
         for (unsigned int i = 0; i < m_bones.size(); ++i)
         {
-            GetAnimLocalBoneTransform(p_animName.c_str(), i, frame, newCurrentPos.x, newCurrentPos.y, newCurrentPos.z,
-                                      newCurrentRot.w, newCurrentRot.x, newCurrentRot.y, newCurrentRot.z);
+            GetAnimLocalBoneTransform(p_animName.c_str(), i, frame, newPos.x, newPos.y, newPos.z,
+                                      newRot.w, newRot.x, newRot.y, newRot.z);
 
-            const Quaternion newCurrentQuat(newCurrentRot.x, newCurrentRot.y, newCurrentRot.z, newCurrentRot.w);
-            m_animData.emplace_back(newCurrentPos, newCurrentQuat);
+            const Quaternion newCurrentQuat(newRot.x, newRot.y, newRot.z, newRot.w);
+            m_animData.emplace_back(newPos, newCurrentQuat);
         }
     }
     AddNewAnimation(p_animName, m_animData);
@@ -140,6 +145,7 @@ void Animation::PlayAnimation(const float p_animationFrameTarget, const std::str
     {
         if (m_animations.find(m_animToPlay) != m_animations.end())
             nextAnimData = m_animations.find(m_animToPlay)->second;
+
         else if (m_animations.find(m_animToPlay) == m_animations.end())
         {
             std::cout << "You didn't Load the next animation. Please load the animation you want to transition to." << '\n';
@@ -149,14 +155,14 @@ void Animation::PlayAnimation(const float p_animationFrameTarget, const std::str
     else
         nextAnimData = animData;
 
-    const size_t nbOfFrames = animData.size() / m_bones.size();
+    const size_t nbOfFrames          = animData.size() / m_bones.size();
     const size_t currentAnimKeyFrame = static_cast<size_t>(p_animationFrameTarget) % (nbOfFrames - 1);
-    const size_t nextAnimKeyFrame = static_cast<size_t>(p_animationFrameTarget + 1) % (nbOfFrames - 1);
+    const size_t nextAnimKeyFrame    = static_cast<size_t>(p_animationFrameTarget + 1) % (nbOfFrames - 1);
 
     for (unsigned int i = 0; i < m_bones.size(); ++i)
     {
         const size_t currentFrame = (currentAnimKeyFrame * m_bones.size()) + i;
-        const size_t nextFrame = (nextAnimKeyFrame * m_bones.size()) + i;
+        const size_t nextFrame    = (nextAnimKeyFrame * m_bones.size()) + i;
 
         DrawProgressBar(p_animationFrameTarget, nbOfFrames);
 
