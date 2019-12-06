@@ -137,13 +137,13 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../Data;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Data;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Engine.lib;GPM.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>XCOPY $(SolutionDir)Data $(OutDir) /y
 mkdir $(Outdir)Resources
-XCOPY $(SolutionDir)Data\Resources $(OutDir)Resources
+XCOPY $(SolutionDir)Data\Resources $(OutDir)Resources /Y
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
