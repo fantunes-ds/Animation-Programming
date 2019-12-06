@@ -30,7 +30,7 @@ namespace Anim
 
     private:
         std::string m_name{};
-        unsigned int m_parentIndex{};
+        int m_parentIndex{};
 
         Matrix4F m_localTPose{};
         Matrix4F m_worldTPose{};

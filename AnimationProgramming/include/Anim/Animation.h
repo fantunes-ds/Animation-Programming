@@ -25,7 +25,7 @@ public:
     void CheckForInput();
 
     /**
-     * Creates the skeleton that will be used for the animations.
+     * @brief Creates the skeleton that will be used for the animations.
      */
     void CreateSkeleton();
 
