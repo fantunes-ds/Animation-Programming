@@ -16,8 +16,8 @@ public:
     void CheckForInput();
     void DisplayBones();
     void LoadAnimation(const std::string& p_animName);
-    void PlayAnimation(float p_animationFrameTarget, const std::string& p_animName);
-    void DrawProgressBar(float p_animationFrameTarget, const int nbOfFrames);
+    void PlayAnimation(const float p_animationFrameTarget, const std::string& p_animName);
+    static void DrawProgressBar(float p_animationFrameTarget, const int nbOfFrames);
     void CreateSkeleton();
 
     void AddNewAnimation(const std::string& p_animName, const std::vector<std::pair<Vector3F, Quaternion>>& p_animData) { m_animations.insert_or_assign(p_animName, p_animData); }
@@ -31,6 +31,7 @@ private:
     float animSpeed = 5;
 
     std::string m_currentAnimation = "ThirdPersonRun.anim";
+    std::string m_animToPlay = "ThirdPersonRun.anim";
 
     std::unordered_map<std::string, std::vector<std::pair<Vector3F, Quaternion>>> m_animations;
 };

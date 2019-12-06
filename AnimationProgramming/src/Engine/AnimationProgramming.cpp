@@ -4,8 +4,8 @@
 
 int main()
 {
-	Animation simulation;
-	Run(&simulation, 1400, 800);
+	Animation animation;
+	Run(&animation, 1400, 800);
 
     return 0;
 }
