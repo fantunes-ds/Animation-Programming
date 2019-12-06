@@ -32,7 +32,7 @@ void Animation::UpdateTime(const float frameTime)
     if (TimeElapsedSinceAnimStart > 0)
         TimeElapsedSinceAnimStart += frameTime * animSpeed;
     else
-        TimeElapsedSinceAnimStart = m_currentAnimationFrameCount;
+        TimeElapsedSinceAnimStart = static_cast<float>(m_currentAnimationFrameCount);
 }
 
 void Animation::CheckForInput()
@@ -192,9 +192,9 @@ void Animation::DrawProgressBar(const float p_animationFrameTarget, const int nb
     const int zOffset{ 175 };
 
     for (int i = (nbOfFrames / 2 * - 1) * displacement; i <= (nbOfFrames / 2) * displacement; i += displacement)
-        DrawLine(i, 0, zOffset, i, 0, zOffset+ 10, 1, 1, 0);
+        DrawLine(static_cast<float>(i), 0, zOffset, static_cast<float>(i), 0, zOffset+ 10, 1, 1, 0);
 
-    DrawLine(((static_cast<int>(p_animationFrameTarget) % nbOfFrames) - nbOfFrames / 2) * displacement, 0, zOffset,
-             ((static_cast<int>(p_animationFrameTarget) % nbOfFrames) - nbOfFrames / 2) * displacement, 0, zOffset + 10,
+    DrawLine(((static_cast<int>(p_animationFrameTarget) % nbOfFrames) - static_cast<float>(nbOfFrames) / 2.0f) * displacement, 0, zOffset,
+             ((static_cast<int>(p_animationFrameTarget) % nbOfFrames) - static_cast<float>(nbOfFrames) / 2.0f) * displacement, 0, zOffset + 10,
                 1, 0, 0);
 }
