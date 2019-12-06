@@ -89,15 +89,15 @@ void Animation::DisplaySkeleton()
     {
         if (m_bones[i].GetParentIndex() > 0)
         {
-            Matrix4F       child = m_bones[i].GetCurrentTransformMatrix();
-            Matrix4F       parent = m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix();
+            const Matrix4F child = m_bones[i].GetCurrentTransformMatrix();
+            const Matrix4F parent = m_bones[m_bones[i].GetParentIndex()].GetCurrentTransformMatrix();
             const Vector3F childPos = { child.m_data[3], child.m_data[7], child.m_data[11] };
             const Vector3F parentPos = { parent.m_data[3], parent.m_data[7], parent.m_data[11] };
             DrawLine(parentPos.x, parentPos.y, parentPos.z, childPos.x, childPos.y, childPos.z, 1, 0, 1);
         }
         else
         {
-            Matrix4F       child = m_bones[i].GetWorldTPose();
+            const Matrix4F       child = m_bones[i].GetWorldTPose();
             const Vector3F childPos = { child.m_data[3], child.m_data[7], child.m_data[11] };
             DrawLine(0, 0, 0, childPos.x, childPos.y, childPos.z, 1, 0, 1);
         }
@@ -123,7 +123,7 @@ void Animation::LoadAnimation(const std::string& p_animName)
             GetAnimLocalBoneTransform(p_animName.c_str(), i, frame, newCurrentPos.x, newCurrentPos.y, newCurrentPos.z,
                                       newCurrentRot.w, newCurrentRot.x, newCurrentRot.y, newCurrentRot.z);
 
-            Quaternion newCurrentQuat(newCurrentRot.x, newCurrentRot.y, newCurrentRot.z, newCurrentRot.w);
+            const Quaternion newCurrentQuat(newCurrentRot.x, newCurrentRot.y, newCurrentRot.z, newCurrentRot.w);
             m_animData.emplace_back(newCurrentPos, newCurrentQuat);
         }
     }
@@ -161,8 +161,8 @@ void Animation::PlayAnimation(const float p_animationFrameTarget, const std::str
         DrawProgressBar(p_animationFrameTarget, nbOfFrames);
 
         const float interTime = Tools::Utils::GetDecimalPart(TimeElapsedSinceAnimStart);
-        Vector3F interpolatedPos{ Vector3F::Lerp(animData[currentFrame].first, nextAnimData[nextFrame].first, interTime) };
-        Quaternion interpolatedQuat{ Quaternion::SlerpShortestPath(animData[currentFrame].second, nextAnimData[nextFrame].second, interTime) };
+        const Vector3F interpolatedPos{ Vector3F::Lerp(animData[currentFrame].first, nextAnimData[nextFrame].first, interTime) };
+        const Quaternion interpolatedQuat{ Quaternion::SlerpShortestPath(animData[currentFrame].second, nextAnimData[nextFrame].second, interTime) };
 
         Matrix4F newMat4 = Matrix4F::CreateTransformation(interpolatedPos, interpolatedQuat, Vector3F::one);
 
